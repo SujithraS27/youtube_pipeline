@@ -1,67 +1,52 @@
-# Twitter Data Pipeline
+# Twitter Data Pipeline – End-to-End Data Engineering Project
 
-This is a beginner-level Data Engineering project where I explored how to extract data from Twitter using the X (formerly Twitter) API with Python and handle real-world issues like authentication and rate limits.
+This is an **End-to-End Data Engineering Project** using **Airflow** and **Python**.  
+In this project, we extract data using the **Twitter API**, transform it using **Python**, deploy the code on **Airflow/EC2**, and save the final result on **Amazon S3**.
 
 ---
 
 ## 📂 Project Overview
 
-The goal of this project was to build a simple data pipeline that:
+The goal of this project is to build a complete data pipeline workflow:
 
-1. Authenticates using API keys and bearer tokens.
-2. Fetches tweets from a specific user’s timeline.
-3. Filters out retweets.
-4. Handles API rate limits by waiting and retrying.
-5. Prints the extracted tweets for demonstration.
-
-This project helped me understand how APIs work, how to handle errors, and how to build robust scripts that can deal with limitations in external services.
+1. **Extract** tweets from a specific user using Twitter API.
+2. **Transform** the data using Python (e.g., filtering retweets, formatting timestamps).
+3. **Load** the data into Amazon S3 for storage and further analysis.
+4. **Deploy** the pipeline using Airflow for scheduling and automation.
 
 ---
 
-## ✅ What I implemented
+## 📝 Task 1 – Getting Data from Twitter API
 
-- Used the Tweepy library to interact with the Twitter API.
-- Accessed user tweets via Tweepy’s `Client` with a bearer token.
-- Filtered tweets to exclude retweets.
-- Handled errors like:
-   - **403 Forbidden** – due to API access restrictions.
-   - **429 Too Many Requests** – API rate limits requiring retry logic.
-- Used exception handling to pause the script when needed.
+### Objective
+Extract tweets from a specific user using the Twitter API and prepare them for further processing.
 
----
+### Implementation Details
+- Used **Tweepy v2 Client** with bearer token authentication.
+- Fetched tweets from Elon Musk’s account.
+- Filtered out retweets to focus on original content.
+- Handled API rate limits (**429 Too Many Requests**) using retry logic with `time.sleep`.
+- Handled exceptions to make the script robust against temporary API failures.
+- Python scripts are organized to integrate easily with Airflow DAGs for scheduling.
+- Output can be saved in **CSV/JSON** for further analysis or demonstration.
 
-## 🚧 Issues I encountered
+### Issues Encountered
+1. **403 Forbidden Error**  
+   - Occurred due to insufficient API access or temporary account restrictions.
+2. **429 Too Many Requests Error**  
+   - Rate limit exceeded; handled by pausing the script before retrying.
+3. **Missing Bearer Token**  
+   - Initially forgot to save the token; learned the importance of secure credential handling.
 
-1. **403 Forbidden**  
-   The API blocked requests because of insufficient permissions or locked accounts.
+### Lessons Learned
+- API rate limits and authentication must be properly handled in real-world pipelines.  
+- Tweepy and Python allow efficient extraction and transformation of API data.  
+- Exception handling ensures stability in automated data pipelines.  
+- Documenting tasks and issues helps track progress and debugging.
 
-2. **429 Too Many Requests**  
-   The API limited the number of requests in a time window, requiring pauses and retries.
+### How to Run Task 1
+1. Replace placeholder `'YOUR_BEARER_TOKEN'` in the script with your actual token.
+2. Install required packages:
 
-3. **Missing Credentials**  
-   Initially forgot to save the bearer token and realized how crucial it is for making requests.
-
----
-
-## ✅ What I learned
-
-✔ Working with APIs requires understanding authentication, permissions, and limits  
-✔ Exception handling is crucial for real-world data pipelines  
-✔ Documenting problems helps in debugging and explaining the process  
-✔ API rate limits need planning to avoid script failures
-
----
-
-## 📌 Notes
-
-- All sensitive credentials have been removed from the code.
-- To run this project, you need to replace placeholders like `'YOUR_BEARER_TOKEN'` with your actual keys.
-- This is a learning project aimed at improving API integration skills.
-
----
-
-## 📈 Next Steps
-
-- Explore advanced error handling and logging.
-- Store data in cloud storage like AWS S3 or databases.
-- Integrate scheduling tools like Apache Airflow.
+```bash
+pip install tweepy pandas s3fs
