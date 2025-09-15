@@ -1,31 +1,65 @@
-import tweepy
+
 import pandas as pd
-import json
 import time
-from datetime import datetime
 import s3fs
+import os
+import googleapiclient.discovery
 
-access_key="MdYqoFKuMV7J8yvVzUAxhBHiS"
-access_secret="eRwKkqS72TniaHqFkJ04275ZYX2jD5ut3fvwZQywZUYbwIrNIb"
-consumer_key="1966868571809558528-yTJhK8flQBHZOm1MLQAv7vb5O1XQeL"
-consumer_secret="JRhBndsMNlIMzNKLucrtunYStTG0403CZsYahd1QeAjXS"
+def process_comments(response_items):
+    comments = []
+    for comment in response_items:
+        author = comment['snippet']['topLevelComment']['snippet']['authorDisplayName']
+        comment_text = comment['snippet']['topLevelComment']['snippet']['textOriginal']
+        publish_time = comment['snippet']['topLevelComment']['snippet']['publishedAt']
+        comment_info = {
+            'author': author,
+            'comment': comment_text,
+            'published_at': publish_time
+        }
+        comments.append(comment_info)
+    print(f'Finished processing {len(comments)} comments.')
+    return comments
 
-auth=tweepy.OAuthHandler(access_key,access_secret)
-auth.set_access_token(consumer_key,consumer_secret)
+def main():
+    # Disable OAuthlib's HTTPS verification when running locally.
+    os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-api=tweepy.API(auth)
-#tweets=api.user_timeline(screen_name='@elonmusk',count=200,include_rts=False,tweet_mode='extended')
+    api_service_name = "youtube"
+    api_version = "v3"
+    DEVELOPER_KEY = "AIzaSyBUMD_3YVfzN3fUtg1Wic_LA6MKwJsqaRg"  # Keep this secure!
 
-client = tweepy.Client(bearer_token='AAAAAAAAAAAAAAAAAAAAALyp4AEAAAAAZkC7XQwV2QCX4qJ8dlP72LaSbSQ%3DxRUh1upQoEV2g8yogq3WpOlGmNWVvsJavbhGTkCNaPGZLmCQvy')
+    youtube = googleapiclient.discovery.build(
+        api_service_name, api_version, developerKey=DEVELOPER_KEY)
 
-user = client.get_user(username='elonmusk')
-try:
-    tweets = client.get_users_tweets(user.data.id, max_results=100,tweet_fields=['created_at'])
-    filtered_tweets = [tweet for tweet in tweets.data if not tweet.text.startswith('RT')]
+    video_id = "q8q3OFFfY6c"
+    comments_list = []
 
-    for tweet in filtered_tweets:
-        print(tweet.text)
+    # Initial request
+    request = youtube.commentThreads().list(
+        part="snippet,replies",
+        videoId=video_id,
+        maxResults=100  # optional but recommended
+    )
+    response = request.execute()
 
-except tweepy.TooManyRequests as e:
-    print("Rate limit reached. Waiting before retrying...")
-    time.sleep(900)
+    comments_list.extend(process_comments(response.get('items', [])))
+
+    # Handle pagination
+    while 'nextPageToken' in response:
+        request = youtube.commentThreads().list(
+            part="snippet,replies",
+            videoId=video_id,
+            pageToken=response['nextPageToken'],
+            maxResults=100
+        )
+        response = request.execute()
+        comments_list.extend(process_comments(response.get('items', [])))
+
+    print(f"Total comments fetched: {len(comments_list)}")
+    df = pd.DataFrame(comments_list)
+    csv_file = "comments.csv"
+    df.to_csv(csv_file, index=False)
+    print(f"Comments saved to {csv_file}")
+
+if __name__ == "__main__":
+    main()
