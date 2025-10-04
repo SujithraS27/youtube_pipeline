@@ -32,9 +32,10 @@ Extract comments from a specific YouTube video and prepare them for further proc
 
 - **403 Forbidden Error** – caused by API not being enabled or incorrect API key configuration.  
 - **Line Ending Warnings (LF vs CRLF)** – resolved using Git settings for consistent line endings on Windows.
+- **Security Challenge: Exposed API Key** - API key accidentally exposed in Git. Resolved by regenerating the key and moving it to a `.env` file to securely store sensitive information.
 
 ### **Lessons Learned**
-
+- Storing credentials securely using environment variables is crucial for production-ready pipelines.
 - Proper API authentication and permissions are crucial.  
 - Handling pagination ensures complete data extraction.  
 - Pandas is powerful for transforming and structuring data.  
