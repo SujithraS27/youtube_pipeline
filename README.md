@@ -40,3 +40,22 @@ Extract comments from a specific YouTube video and prepare them for further proc
 - Handling pagination ensures complete data extraction.  
 - Pandas is powerful for transforming and structuring data.  
 - Documenting issues and solutions aids troubleshooting and future development.
+
+## Task 2 – Data Transformation
+
+### Objective
+Transform raw YouTube comment data into a clean, structured format suitable for downstream storage and orchestration.
+
+### Implementation
+- Read raw data from `comments.csv`
+- Performed data cleaning using **Python and Pandas**
+- Removed null and inconsistent records
+- Standardized the `published_at` timestamp column
+- Enriched the dataset by adding derived features:
+  - `comment_length` – number of characters in each comment
+  - `word_count` – number of words in each comment
+- Ensured the dataset is structured and analysis-ready
+- Saved the transformed data as a new CSV file
+
+### Output
+`comments_clean.csv`
